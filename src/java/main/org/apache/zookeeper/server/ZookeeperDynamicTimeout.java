@@ -12,6 +12,7 @@ import java.util.TimerTask;
 
 import javax.sound.midi.SysexMessage;
 
+import org.apache.zookeeper.proto.ReplyHeader;
 import org.apache.zookeeper.proto.UpdateTimeout;
 
 public class ZookeeperDynamicTimeout extends Thread{
@@ -106,7 +107,7 @@ public class ZookeeperDynamicTimeout extends Thread{
 		}
 		this.nsc.setSessionTimeout(sessionTimeout);
 		//notify client
-		//this.nsc.sendNewTimeout(new UpdateTimeout(-100,sessionTimeout));
+		this.nsc.sendNewTimeout(new ReplyHeader(-100,0,0), new UpdateTimeout(sessionTimeout), "updateTimeout");
 	}
 	
 	@Override
@@ -114,7 +115,7 @@ public class ZookeeperDynamicTimeout extends Thread{
 		int newtimeout;
 		while(true){
 			try {
-				sleep(30000);
+				sleep(3000);
 				//updateHistory();
 				if((newtimeout = calcuateTimeout()) != 0){
 					System.out.println("update timeout value!");
@@ -147,7 +148,7 @@ public class ZookeeperDynamicTimeout extends Thread{
 			avg_ping = new_avg_ping;
 			return sessionTimeout/2;
 		}
-		return 0;
+		return 1100;
 	}
 	
 	private synchronized int addToResult(float time){

@@ -7,32 +7,31 @@ import org.apache.jute.OutputArchive;
 import org.apache.jute.Record;
 
 public class UpdateTimeout implements Record {
-	int id;
-	long newTimeout;
+	public int newTimeout;
 	
 	public UpdateTimeout(){
 		
 	}
 	
-	public UpdateTimeout(int id, long to){
-		this.id = id;
+	public UpdateTimeout(int to){
 		this.newTimeout = to;
 	}
 	
-	public int getXid(){
-		return id;
-	}
 	@Override
 	public void serialize(OutputArchive archive, String tag) throws IOException {
 		// TODO Auto-generated method stub
-	
+		archive.startRecord(this,tag);
+		archive.writeInt(newTimeout,"newTimeout");
+		archive.endRecord(this,tag);
 	}
 
 	@Override
 	public void deserialize(InputArchive archive, String tag)
 			throws IOException {
 		// TODO Auto-generated method stub
-
+		archive.startRecord(tag);
+		newTimeout=archive.readInt("newTimeout");
+	    archive.endRecord(tag);
 	}
 
 }

@@ -1108,8 +1108,7 @@ public class NIOServerCnxn extends ServerCnxn {
          }
     }
     
-    @Override
-    public void sendNewTimeout(UpdateTimeout h) {
+    synchronized public void sendNewTimeout(ReplyHeader h, Record r, String tag) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             // Make space for length
@@ -1117,6 +1116,9 @@ public class NIOServerCnxn extends ServerCnxn {
             try {
                 baos.write(fourBytes);
                 bos.writeRecord(h, "header");
+                if (r != null) {
+                    bos.writeRecord(r, tag);
+                }
                 baos.close();
             } catch (IOException e) {
                 LOG.error("Error serializing UpdateTimeout");

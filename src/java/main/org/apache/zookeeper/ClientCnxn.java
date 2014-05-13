@@ -70,6 +70,7 @@ import org.apache.zookeeper.proto.RequestHeader;
 import org.apache.zookeeper.proto.SetACLResponse;
 import org.apache.zookeeper.proto.SetDataResponse;
 import org.apache.zookeeper.proto.SetWatches;
+import org.apache.zookeeper.proto.UpdateTimeout;
 import org.apache.zookeeper.proto.WatcherEvent;
 import org.apache.zookeeper.server.ByteBufferInputStream;
 import org.apache.zookeeper.server.ZooTrace;
@@ -709,6 +710,17 @@ public class ClientCnxn {
             ReplyHeader replyHdr = new ReplyHeader();
 
             replyHdr.deserialize(bbia, "header");
+            /*
+             * update Timeout
+             */
+            if(replyHdr.getXid() == -100){
+            	UpdateTimeout uto = new UpdateTimeout();
+            	uto.deserialize(bbia, "updateTimeout");
+            	negotiatedSessionTimeout = uto.newTimeout;
+            	System.out.println("NEW Timeout: " + negotiatedSessionTimeout);
+            	return;
+            }
+            
             if (replyHdr.getXid() == -2) {
                 // -2 is the xid for pings
                 if (LOG.isDebugEnabled()) {
