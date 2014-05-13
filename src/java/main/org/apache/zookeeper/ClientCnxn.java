@@ -340,6 +340,7 @@ public class ClientCnxn {
             throws IOException {
         this(chrootPath, hostProvider, sessionTimeout, zooKeeper, watcher,
              clientCnxnSocket, 0, new byte[16], canBeReadOnly);
+        System.out.println("Client Starting...");
     }
 
     /**

@@ -55,6 +55,7 @@ import org.apache.zookeeper.proto.GetSASLRequest;
 import org.apache.zookeeper.proto.ReplyHeader;
 import org.apache.zookeeper.proto.RequestHeader;
 import org.apache.zookeeper.proto.SetSASLResponse;
+import org.apache.zookeeper.proto.UpdateTimeout;
 import org.apache.zookeeper.server.DataTree.ProcessTxnResult;
 import org.apache.zookeeper.server.RequestProcessor.RequestProcessorException;
 import org.apache.zookeeper.server.ServerCnxn.CloseRequestException;
@@ -620,32 +621,15 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         }
     }
     
-    public void updateSession(ServerCnxn cnxn, boolean valid) {
-        try {
-            ConnectResponse rsp = new ConnectResponse(0, cnxn.getSessionTimeout()
-                    , cnxn.getSessionId(), generatePasswd(cnxn.getSessionId()));
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            BinaryOutputArchive bos = BinaryOutputArchive.getArchive(baos);
-            bos.writeInt(-1, "len");
-            rsp.serialize(bos, "connect");
-            if (!cnxn.isOldClient) {
-                bos.writeBool(
-                        this instanceof ReadOnlyZooKeeperServer, "readOnly");
-            }
-            baos.close();
-            ByteBuffer bb = ByteBuffer.wrap(baos.toByteArray());
-            bb.putInt(bb.remaining() - 4).rewind();
-            cnxn.sendBuffer(bb);
-            
-            LOG.info("updated session 0x"
-                        + Long.toHexString(cnxn.getSessionId())
-                        + " with negotiated timeout " + cnxn.getSessionTimeout()
-                        + " for client "
-                        + cnxn.getRemoteSocketAddress());
-        } catch (Exception e) {
-            LOG.warn("Exception while update session, closing", e);
-            cnxn.close();
-        }
+    public void updateSession(ServerCnxn cnxn, long to) {
+    	//notify client
+        /*try {
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
     }
     
     public void closeSession(ServerCnxn cnxn, RequestHeader requestHeader) {

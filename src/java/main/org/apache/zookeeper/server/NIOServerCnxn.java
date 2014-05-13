@@ -47,6 +47,7 @@ import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.data.Id;
 import org.apache.zookeeper.proto.ReplyHeader;
 import org.apache.zookeeper.proto.RequestHeader;
+import org.apache.zookeeper.proto.UpdateTimeout;
 import org.apache.zookeeper.proto.WatcherEvent;
 import org.apache.zookeeper.server.quorum.Leader;
 import org.apache.zookeeper.server.quorum.LeaderZooKeeperServer;
@@ -80,7 +81,7 @@ public class NIOServerCnxn extends ServerCnxn {
     private final ZooKeeperServer zkServer;
     private ZookeeperDynamicTimeout zdt = new ZookeeperDynamicTimeout();
     private boolean startedDynamicTimeout = false;
-
+    
     /**
      * The number of requests that have been submitted but not yet responded to.
      */
@@ -1102,6 +1103,29 @@ public class NIOServerCnxn extends ServerCnxn {
                     }
                 }
             }
+         } catch(Exception e) {
+            LOG.warn("Unexpected exception. Destruction averted.", e);
+         }
+    }
+    
+    @Override
+    public void sendNewTimeout(UpdateTimeout h) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            // Make space for length
+            BinaryOutputArchive bos = BinaryOutputArchive.getArchive(baos);
+            try {
+                baos.write(fourBytes);
+                bos.writeRecord(h, "header");
+                baos.close();
+            } catch (IOException e) {
+                LOG.error("Error serializing UpdateTimeout");
+            }
+            byte b[] = baos.toByteArray();
+            ByteBuffer bb = ByteBuffer.wrap(b);
+            bb.putInt(b.length - 4).rewind();
+            sendBuffer(bb);
+            
          } catch(Exception e) {
             LOG.warn("Unexpected exception. Destruction averted.", e);
          }

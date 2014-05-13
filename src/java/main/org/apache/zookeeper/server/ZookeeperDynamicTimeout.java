@@ -12,6 +12,8 @@ import java.util.TimerTask;
 
 import javax.sound.midi.SysexMessage;
 
+import org.apache.zookeeper.proto.UpdateTimeout;
+
 public class ZookeeperDynamicTimeout extends Thread{
 
 	/**
@@ -99,11 +101,12 @@ public class ZookeeperDynamicTimeout extends Thread{
 			getInit = true;
 		}
 		sessionTimeout = newtimeout;
-		if(this.nsc.getSessionTracker().UpdateSession(this.sessionId, sessionTimeout) == 0){
+		if(this.nsc.getSessionTracker().UpdateSession(sessionId, sessionTimeout) == 0){
 			return;
 		}
 		this.nsc.setSessionTimeout(sessionTimeout);
-		//this.nsc.getZooKeeperServer().updateSession(this.nsc, true); //notify client
+		//notify client
+		//this.nsc.sendNewTimeout(new UpdateTimeout(-100,sessionTimeout));
 	}
 	
 	@Override
