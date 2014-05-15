@@ -711,7 +711,7 @@ public class ClientCnxn {
 
             replyHdr.deserialize(bbia, "header");
             /*
-             * update Timeout
+             * update Timeout.
              */
             if(replyHdr.getXid() == -100){
             	UpdateTimeout uto = new UpdateTimeout();
@@ -720,6 +720,8 @@ public class ClientCnxn {
             	System.out.println("NEW Timeout: " + negotiatedSessionTimeout);
             	return;
             }
+            //change Ping or not ?
+            
             
             if (replyHdr.getXid() == -2) {
                 // -2 is the xid for pings

@@ -332,9 +332,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
     }
     
     @Override
-    void doTransport(int waitTimeOut, List<Packet> pendingQueue, LinkedList<Packet> outgoingQueue,
-                     ClientCnxn cnxn)
-            throws IOException, InterruptedException {
+    void doTransport(int waitTimeOut, List<Packet> pendingQueue, LinkedList<Packet> outgoingQueue,ClientCnxn cnxn)throws IOException, InterruptedException {
         selector.select(waitTimeOut);
         Set<SelectionKey> selected;
         synchronized (this) {

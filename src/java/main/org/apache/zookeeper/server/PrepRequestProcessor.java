@@ -510,9 +510,12 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
         request.txn = null;
         System.out.println("request.type: " + request.op2String(request.type));
         System.out.println(System.currentTimeMillis());
-        //System.out.println(this.zks);
-        //System.out.println(this.zks.zdt);
-        //this.zks.zdt.addTohistory(System.currentTimeMillis());
+        /**
+         * record HearttBeat
+         */
+        NIOServerCnxn n = (NIOServerCnxn) request.cnxn;
+        n.zdt.addTohistory(System.currentTimeMillis());
+        
         try {
             switch (request.type) {
             case OpCode.create:

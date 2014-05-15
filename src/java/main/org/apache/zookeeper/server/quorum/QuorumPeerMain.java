@@ -109,8 +109,10 @@ public class QuorumPeerMain {
         purgeMgr.start();
 
         if (args.length == 1 && config.servers.size() > 0) {
+        	//cluster mode
             runFromConfig(config);
-        } else {// standlone mode
+        } else {
+        	// standlone mode
             LOG.warn("Either no config or no quorum defined in config, running "
                     + " in standalone mode");
             // there is only server in the quorum -- run as standalone

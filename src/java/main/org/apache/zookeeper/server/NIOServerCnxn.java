@@ -79,7 +79,7 @@ public class NIOServerCnxn extends ServerCnxn {
     int sessionTimeout;
 
     private final ZooKeeperServer zkServer;
-    private ZookeeperDynamicTimeout zdt = new ZookeeperDynamicTimeout();
+    public ZookeeperDynamicTimeout zdt = new ZookeeperDynamicTimeout();
     private boolean startedDynamicTimeout = false;
     
     /**
