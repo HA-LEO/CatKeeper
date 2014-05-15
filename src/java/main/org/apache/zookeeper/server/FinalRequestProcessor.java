@@ -166,7 +166,13 @@ public class FinalRequestProcessor implements RequestProcessor {
                 lastOp = "PING";
                 cnxn.updateStatsForResponse(request.cxid, request.zxid, lastOp,
                         request.createTime, System.currentTimeMillis());
-
+                /**
+                 * record HeartBeat
+                 */
+                NIOServerCnxn n = (NIOServerCnxn) request.cnxn;
+                if(n != null){
+                	n.zdt.addTohistory(System.nanoTime());
+                }
                 cnxn.sendResponse(new ReplyHeader(-2,
                         zks.getZKDatabase().getDataTreeLastProcessedZxid(), 0), null, "response");
                 return;

@@ -702,6 +702,7 @@ public class ClientCnxn {
         private final ClientCnxnSocket clientCnxnSocket;
         private Random r = new Random(System.nanoTime());        
         private boolean isFirstConnect = true;
+        private boolean isFirstPing = false;
 
         void readResponse(ByteBuffer incomingBuffer) throws IOException {
             ByteBufferInputStream bbis = new ByteBufferInputStream(
@@ -717,6 +718,8 @@ public class ClientCnxn {
             	UpdateTimeout uto = new UpdateTimeout();
             	uto.deserialize(bbia, "updateTimeout");
             	negotiatedSessionTimeout = uto.newTimeout;
+            	readTimeout = negotiatedSessionTimeout * 2 / 3;
+            	
             	System.out.println("NEW Timeout: " + negotiatedSessionTimeout);
             	return;
             }
@@ -1043,6 +1046,7 @@ public class ClientCnxn {
                         }
                         to = readTimeout - clientCnxnSocket.getIdleRecv();
                     } else {
+                    	
                         to = connectTimeout - clientCnxnSocket.getIdleRecv();
                     }
                     
@@ -1054,16 +1058,31 @@ public class ClientCnxn {
                                         + Long.toHexString(sessionId));
                     }
                     if (state.isConnected()) {
-                        int timeToNextPing = readTimeout / 2
-                                - clientCnxnSocket.getIdleSend();
-                        if (timeToNextPing <= 0) {
-                            sendPing();
-                            clientCnxnSocket.updateLastSend();
-                        } else {
-                            if (timeToNextPing < to) {
-                                to = timeToNextPing;
+                    	if(isFirstPing == false){
+	                        int timeToNextPing = readTimeout / 2 - clientCnxnSocket.getIdleSend();
+	                        if (timeToNextPing <= 0) {
+	                            sendPing();
+	                            clientCnxnSocket.updateLastSend();
+		                        isFirstPing = true;
+		                        clientCnxnSocket.updatelastSendPing();
+	                        } else {
+	                            if (timeToNextPing < to) {
+	                            	//to is Selector's timeout
+	                                to = timeToNextPing;
+	                            }
+	                        }
+                    	}else{
+                    		int timeToNextPing = readTimeout / 2 - clientCnxnSocket.getIdleSendPing();
+                            if (timeToNextPing <= 0) {
+                                sendPing();
+                                clientCnxnSocket.updatelastSendPing();
+                            } else {
+                                if (timeToNextPing < to) {
+                                	//to is Selector's timeout
+                                    to = timeToNextPing;
+                                }
                             }
-                        }
+                    	}      
                     }
 
                     // If we are in read-only mode, seek for read/write server

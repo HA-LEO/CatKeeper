@@ -29,8 +29,8 @@ public class ZookeeperDynamicTimeout extends Thread{
 	private int sessionTimeout = -1;
 	private float avg_ping = 0;
 	private final static int length = 11;
-	private long[] history = new long[length];
-	private int p1 = 0;
+	private volatile long[] history = new long[length];
+	private volatile int p1 = 0;
 	private float[] result = new float[length-1];
 	private int p2 = 0;
 	Timer timer;
@@ -106,7 +106,7 @@ public class ZookeeperDynamicTimeout extends Thread{
 			return;
 		}
 		this.nsc.setSessionTimeout(sessionTimeout);
-		//notify client
+		//notify client. xid use -100
 		this.nsc.sendNewTimeout(new ReplyHeader(-100,0,0), new UpdateTimeout(sessionTimeout), "updateTimeout");
 	}
 	
@@ -115,12 +115,12 @@ public class ZookeeperDynamicTimeout extends Thread{
 		int newtimeout;
 		while(true){
 			try {
-				sleep(3000);
-				//updateHistory();
-				if((newtimeout = calcuateTimeout()) != 0){
+				sleep(10000);
+				updateHistory();
+				/*if((newtimeout = calcuateTimeout()) != 0){
 					System.out.println("update timeout value!");
 					updateSessionTimeout(newtimeout);
-				}
+				}*/
 				
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -172,19 +172,28 @@ public class ZookeeperDynamicTimeout extends Thread{
 		return p1;
 	}
 	public synchronized void updateHistory(){
+		if((this.init_sessionTimeout = this.nsc.getSessionTimeout()) == 0){
+			return;
+		}
 		int t = p1;
+		float tmp;
 		for(int i=1; i<length; i++){
-			result[i-1] = history[(t+i)%length] - history[(t+i-1)%length];
-			System.out.print(result[i-1] + "ms ");
+			tmp = (float) (history[(t+i)%length]- history[(t+i-1)%length])/1000000;
+			if(tmp != init_sessionTimeout/3 && tmp > 0){
+				result[i-1] = tmp - init_sessionTimeout/3;
+				System.out.print(result[i-1] + "ms ");
+			}
 		}
 		System.out.println();
 	}
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Timer timer = new Timer();
+		/*Timer timer = new Timer();
 		PING p = new ZookeeperDynamicTimeout().new PING("192.168.10.100");
-		timer.schedule(p,1000,1000);
+		timer.schedule(p,1000,1000);*/
+		System.out.println(System.nanoTime());
+		System.out.println(System.currentTimeMillis());
 	}
 
 }

@@ -60,8 +60,20 @@ abstract class ClientCnxnSocket {
     protected long lastHeard;
     protected long lastSend;
     protected long now;
+    protected long lastSendPing;
     protected ClientCnxn.SendThread sendThread;
 
+    /**
+     * For send Ping with Fixed intervals
+     */
+    public void updatelastSendPing(){
+    	this.lastSendPing = now;
+    }
+    int getIdleSendPing() {
+        return (int) (now - lastSendPing);
+    }
+    
+    
     /**
      * The sessionId is only available here for Log and Exception messages.
      * Otherwise the socket doesn't need to know it.

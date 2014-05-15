@@ -508,13 +508,8 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
         // request.type + " id = 0x" + Long.toHexString(request.sessionId));
         request.hdr = null;
         request.txn = null;
-        System.out.println("request.type: " + request.op2String(request.type));
-        System.out.println(System.currentTimeMillis());
-        /**
-         * record HearttBeat
-         */
-        NIOServerCnxn n = (NIOServerCnxn) request.cnxn;
-        n.zdt.addTohistory(System.currentTimeMillis());
+        //System.out.println("request.type: " + request.op2String(request.type));
+        //System.out.println(System.currentTimeMillis());
         
         try {
             switch (request.type) {
@@ -627,7 +622,6 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
             case OpCode.ping:
             	zks.sessionTracker.checkSession(request.sessionId,
                         request.getOwner());
-            	//this.zks.zdt.addTohistory(System.currentTimeMillis());
             	break;
             }
         } catch (KeeperException e) {
@@ -663,7 +657,7 @@ public class PrepRequestProcessor extends Thread implements RequestProcessor {
             }
         }
         request.zxid = zks.getZxid();
-        System.out.println("reply!");
+        //System.out.println("reply!");
         nextProcessor.processRequest(request);
     }
 
