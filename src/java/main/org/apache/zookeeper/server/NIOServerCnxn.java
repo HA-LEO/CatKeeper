@@ -76,7 +76,7 @@ public class NIOServerCnxn extends ServerCnxn {
 
     LinkedBlockingQueue<ByteBuffer> outgoingBuffers = new LinkedBlockingQueue<ByteBuffer>();
 
-    int sessionTimeout;
+    int sessionTimeout = 0;
 
     private final ZooKeeperServer zkServer;
     public ZookeeperDynamicTimeout zdt = new ZookeeperDynamicTimeout();

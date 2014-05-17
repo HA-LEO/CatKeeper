@@ -721,6 +721,8 @@ public class ClientCnxn {
             	readTimeout = negotiatedSessionTimeout * 2 / 3;
             	
             	System.out.println("NEW Timeout: " + negotiatedSessionTimeout);
+            	System.out.println("NEW Client Timeout: " + readTimeout);
+            	System.out.println("NEW PING interval: " + readTimeout/2 + "\n");
             	return;
             }
             //change Ping or not ?
