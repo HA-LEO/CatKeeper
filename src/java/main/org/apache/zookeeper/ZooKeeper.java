@@ -134,6 +134,8 @@ public class ZooKeeper {
             new HashMap<String, Set<Watcher>>();
         private final Map<String, Set<Watcher>> childWatches =
             new HashMap<String, Set<Watcher>>();
+        
+        private static final String HBpath = "/HA/HB";
 
         private volatile Watcher defaultWatcher;
 
@@ -191,15 +193,24 @@ public class ZooKeeper {
             case NodeDataChanged:
             case NodeCreated:
                 synchronized (dataWatches) {
-                    addTo(dataWatches.remove(clientPath), result);
+                	if(clientPath.equals(HBpath))
+                		addTo(dataWatches.get(clientPath), result);
+                	else
+                		addTo(dataWatches.remove(clientPath), result);
                 }
                 synchronized (existWatches) {
-                    addTo(existWatches.remove(clientPath), result);
+                	if(clientPath.equals(HBpath))
+                		addTo(existWatches.get(clientPath), result);
+                	else
+                		addTo(existWatches.remove(clientPath), result);
                 }
                 break;
             case NodeChildrenChanged:
                 synchronized (childWatches) {
-                    addTo(childWatches.remove(clientPath), result);
+                	if(clientPath.equals(HBpath))
+                		addTo(childWatches.get(clientPath), result);
+                	else
+                		addTo(childWatches.remove(clientPath), result);
                 }
                 break;
             case NodeDeleted:

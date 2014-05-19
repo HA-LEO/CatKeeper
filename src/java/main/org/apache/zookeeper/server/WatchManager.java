@@ -37,6 +37,7 @@ import org.apache.zookeeper.Watcher.Event.KeeperState;
  */
 public class WatchManager {
     private static final Logger LOG = LoggerFactory.getLogger(WatchManager.class);
+    private static final String HBpath = "/HA/HB";
 
     private final HashMap<String, HashSet<Watcher>> watchTable =
         new HashMap<String, HashSet<Watcher>>();
@@ -71,7 +72,10 @@ public class WatchManager {
         }
         paths.add(path);
     }
-
+    /**
+     * be called, when CS session closed.
+     * @param watcher
+     */
     public synchronized void removeWatcher(Watcher watcher) {
         HashSet<String> paths = watch2Paths.remove(watcher);
         if (paths == null) {
@@ -87,9 +91,22 @@ public class WatchManager {
             }
         }
     }
-
+    
+    /**
+     * HBpath is Permanently trigger
+     * @param path
+     * @param type
+     * @return
+     */
     public Set<Watcher> triggerWatch(String path, EventType type) {
-        return triggerWatch(path, type, null);
+    	System.out.println("triggerWatch: " + path);
+    	System.out.println("EventType: " + type);
+    	System.out.println("current HBpath: " + watchTable.get(HBpath));
+    	if(path.equals(HBpath) && type != EventType.NodeDeleted){
+    		return myTriggerWatch(path, type, null);
+    	}else{
+            return triggerWatch(path, type, null);
+    	}
     }
 
     public Set<Watcher> triggerWatch(String path, EventType type, Set<Watcher> supress) {
@@ -121,7 +138,31 @@ public class WatchManager {
         }
         return watchers;
     }
-
+    
+    public Set<Watcher> myTriggerWatch(String path, EventType type, Set<Watcher> supress) {
+        WatchedEvent e = new WatchedEvent(type,
+                KeeperState.SyncConnected, path);
+        HashSet<Watcher> watchers;
+        synchronized (this) {
+        	watchers = watchTable.get(path);
+            if (watchers == null || watchers.isEmpty()) {
+                if (LOG.isTraceEnabled()) {
+                    ZooTrace.logTraceMessage(LOG,
+                            ZooTrace.EVENT_DELIVERY_TRACE_MASK,
+                            "No watchers for " + path);
+                }
+                return null;
+            }
+        }
+        for (Watcher w : watchers) {
+            if (supress != null && supress.contains(w)) {
+                continue;
+            }
+            w.process(e);
+        }
+        return watchers;
+    }
+    
     /**
      * Brief description of this object.
      */
@@ -168,4 +209,9 @@ public class WatchManager {
             }
         }
     }
+    
+    public static void main(String[] args) {
+    	
+    }
+    
 }

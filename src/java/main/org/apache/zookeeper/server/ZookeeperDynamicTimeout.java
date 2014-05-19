@@ -28,7 +28,7 @@ public class ZookeeperDynamicTimeout extends Thread{
 	private long sessionId = -1;
 	private int sessionTimeout = -1;
 	private float avg_ping = 0;
-	private final static int length = 11;
+	private final static int length = 21;
 	private long[] history = new long[length];
 	private volatile int p1 = 0;
 	private volatile boolean usingHistory = false;
@@ -58,6 +58,7 @@ public class ZookeeperDynamicTimeout extends Thread{
 		this.clientAddr = n.getRemoteSocketAddress().getAddress();
 		//timer = new Timer();
 		//timer.schedule(new PING(this.clientAddr.getHostAddress()),5000,this.init_ticktime);
+		
 	}
 	
 	public class PING extends TimerTask{
@@ -114,14 +115,17 @@ public class ZookeeperDynamicTimeout extends Thread{
 		int newtimeout;
 		while(true){
 			try {
-				sleep(5000);
+				sleep(500000000);
+				if(nsc.sock == null && getInit == true)
+					break;
 				if(updateResult() == false)
 					continue;
 				if((newtimeout = calcuateTimeout()) != 0){
 					System.out.println("update timeout value! \n");
 					updateSessionTimeout(newtimeout);
+				}else{
+					System.out.println("Don't need to update timeout value! \n");
 				}
-				
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -134,25 +138,49 @@ public class ZookeeperDynamicTimeout extends Thread{
 	 * @return new timeout value
 	 */
 	private int calcuateTimeout(){
-		float new_avg_ping = 0;
-		avg_ping = sessionTimeout/3;
-		for(int i=0; i<length-1; i++){
-			new_avg_ping += result[i];
-		}
-		new_avg_ping = new_avg_ping/(length-1);
+		float new_avg_ping = 0, new_min_ping = 0, new_max_ping = 0;
+		avg_ping = (float) (sessionTimeout/3.0);
+		new_avg_ping = avgOfResult();
+		new_min_ping = minOfResult();
+		new_max_ping = maxOfResult();
 		System.out.println("AVG " + new_avg_ping);
+		System.out.println("MIN " + new_min_ping);
+		System.out.println("MAX " + new_max_ping);
 		System.out.println("ping interval: " + avg_ping);
 		
-		
-/*		if(new_avg_ping > 2*avg_ping){
-			avg_ping = new_avg_ping;
-			return sessionTimeout*2;
+		if(Math.abs(new_avg_ping) > avg_ping*0.05 ||
+				Math.abs(new_min_ping) > avg_ping*0.1 ||
+				Math.abs(new_max_ping) > avg_ping*0.07)
+		{
+			return (int) (sessionTimeout + 10*(new_avg_ping+new_max_ping)/2);
 		}
-		if(new_avg_ping < avg_ping/2){
-			avg_ping = new_avg_ping;
-			return sessionTimeout/2;
-		}*/
-		return (int) (sessionTimeout+3*new_avg_ping);
+		return 0;
+	}
+	
+	private float avgOfResult(){
+		float t=0;
+		for(int i=0; i<result.length; i++){
+			t += result[i];
+		}
+		return t/result.length;
+	}
+	
+	private float minOfResult(){
+		float min = sessionTimeout*1000;
+		for(int i=0; i<result.length; i++){
+			if(result[i]<min)
+				min = result[i];
+		}
+		return min;
+	}
+	
+	private float maxOfResult(){
+		float max = -sessionTimeout*1000;
+		for(int i=0; i<result.length; i++){
+			if(result[i]>max)
+				max = result[i];
+		}
+		return max;
 	}
 	
 	private int addToResult(float time){
@@ -192,8 +220,8 @@ public class ZookeeperDynamicTimeout extends Thread{
 		float tmp;
 		for(int i=1; i<length; i++){
 			tmp = (float) (history[(t+i)%length]- history[(t+i-1)%length])/1000000;
-			if(tmp != sessionTimeout/3 && tmp > 0){
-				result[i-1] = (float)(Math.round((tmp - sessionTimeout/3)*1000))/1000;
+			if(Math.abs(tmp - sessionTimeout/3.0) > 0.01  && tmp > 0){
+				result[i-1] = (float)(Math.round((tmp - sessionTimeout/3.0)*1000))/1000;
 				System.out.print(result[i-1] + "ms ");
 				//log
 				p.println(result[i-1]);
@@ -211,5 +239,6 @@ public class ZookeeperDynamicTimeout extends Thread{
 		timer.schedule(p,1000,1000);*/
 		System.out.println(System.nanoTime());
 		System.out.println(System.currentTimeMillis());
+		System.out.println(10/3.0);
 	}
 }
