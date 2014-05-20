@@ -19,8 +19,10 @@
 package org.apache.zookeeper.server;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -37,7 +39,7 @@ import org.apache.zookeeper.Watcher.Event.KeeperState;
  */
 public class WatchManager {
     private static final Logger LOG = LoggerFactory.getLogger(WatchManager.class);
-    private static final String HBpath = "/HA/HB";
+    private static final List<String> specialNode = new ArrayList<String>();
 
     private final HashMap<String, HashSet<Watcher>> watchTable =
         new HashMap<String, HashSet<Watcher>>();
@@ -92,6 +94,16 @@ public class WatchManager {
         }
     }
     
+    public static void initSpecialNodes(String s){
+    	String[] r = s.split(";");
+    	for(int i=0; i<r.length; i++){
+    		specialNode.add(r[i]);
+    	}
+    }
+    private boolean isSpecialNode(String s){
+    	return specialNode.contains(s);
+    }
+    
     /**
      * HBpath is Permanently trigger
      * @param path
@@ -99,10 +111,10 @@ public class WatchManager {
      * @return
      */
     public Set<Watcher> triggerWatch(String path, EventType type) {
-    	System.out.println("triggerWatch: " + path);
-    	System.out.println("EventType: " + type);
-    	System.out.println("current HBpath: " + watchTable.get(HBpath));
-    	if(path.equals(HBpath) && type != EventType.NodeDeleted){
+//    	System.out.println("triggerWatch: " + path);
+//    	System.out.println("EventType: " + type);
+//    	System.out.println("current HBpath: " + watchTable.get(HBpath));
+    	if(isSpecialNode(path) && type != EventType.NodeDeleted){
     		return myTriggerWatch(path, type, null);
     	}else{
             return triggerWatch(path, type, null);

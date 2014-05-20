@@ -61,6 +61,7 @@ public abstract class ServerCnxn implements Stats, Watcher {
 
     public abstract void sendResponse(ReplyHeader h, Record r, String tag)
         throws IOException;
+    public abstract void sendSpecialNode(ReplyHeader h, Record r, String tag);
 
     /* notify the client the session is closing and close/cleanup socket */
     abstract void sendCloseSession();

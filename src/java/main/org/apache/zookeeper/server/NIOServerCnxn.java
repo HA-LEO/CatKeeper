@@ -1111,7 +1111,6 @@ public class NIOServerCnxn extends ServerCnxn {
     synchronized public void sendNewTimeout(ReplyHeader h, Record r, String tag) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            // Make space for length
             BinaryOutputArchive bos = BinaryOutputArchive.getArchive(baos);
             try {
                 baos.write(fourBytes);
@@ -1128,6 +1127,29 @@ public class NIOServerCnxn extends ServerCnxn {
             bb.putInt(b.length - 4).rewind();
             sendBuffer(bb);
             
+         } catch(Exception e) {
+            LOG.warn("Unexpected exception. Destruction averted.", e);
+         }
+    }
+    
+    synchronized public void sendSpecialNode(ReplyHeader h, Record r, String tag) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            BinaryOutputArchive bos = BinaryOutputArchive.getArchive(baos);
+            try {
+                baos.write(fourBytes);
+                bos.writeRecord(h, "header");
+                if (r != null) {
+                    bos.writeRecord(r, tag);
+                }
+                baos.close();
+            } catch (IOException e) {
+                LOG.error("Error serializing SpecialNode");
+            }
+            byte b[] = baos.toByteArray();
+            ByteBuffer bb = ByteBuffer.wrap(b);
+            bb.putInt(b.length - 4).rewind();
+            sendBuffer(bb);
          } catch(Exception e) {
             LOG.warn("Unexpected exception. Destruction averted.", e);
          }

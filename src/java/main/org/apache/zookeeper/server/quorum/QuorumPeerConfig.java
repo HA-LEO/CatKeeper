@@ -74,6 +74,8 @@ public class QuorumPeerConfig {
 
     protected LearnerType peerType = LearnerType.PARTICIPANT;
     
+    protected String specialNode;
+    
     /**
      * Minimum snapshot retain count.
      * @see org.apache.zookeeper.server.PurgeTxnLog#purge(File, File, int)
@@ -135,7 +137,9 @@ public class QuorumPeerConfig {
         for (Entry<Object, Object> entry : zkProp.entrySet()) {
             String key = entry.getKey().toString().trim();
             String value = entry.getValue().toString().trim();
-            if (key.equals("dataDir")) {
+            if(key.equals("specialNode")){
+            	specialNode = value;
+            } else if (key.equals("dataDir")) {
                 dataDir = value;
             } else if (key.equals("dataLogDir")) {
                 dataLogDir = value;
@@ -407,5 +411,9 @@ public class QuorumPeerConfig {
 
     public LearnerType getPeerType() {
         return peerType;
+    }
+    
+    public String getSpecialNode(){
+    	return specialNode;
     }
 }

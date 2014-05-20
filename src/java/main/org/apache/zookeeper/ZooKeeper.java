@@ -101,7 +101,10 @@ public class ZooKeeper {
 
     private final ZKWatchManager watchManager = new ZKWatchManager();
 
-    List<String> getDataWatches() {
+    public void initWatchManager(String s) {
+		watchManager.initSpecialNodes(s);
+	}
+	List<String> getDataWatches() {
         synchronized(watchManager.dataWatches) {
             List<String> rc = new ArrayList<String>(watchManager.dataWatches.keySet());
             return rc;
@@ -135,10 +138,20 @@ public class ZooKeeper {
         private final Map<String, Set<Watcher>> childWatches =
             new HashMap<String, Set<Watcher>>();
         
-        private static final String HBpath = "/HA/HB";
+        private static final List<String> specialNode = new ArrayList<String>();
 
         private volatile Watcher defaultWatcher;
-
+        
+        public void initSpecialNodes(String s){
+        	String[] r = s.split(";");
+        	for(int i=0; i<r.length; i++){
+        		specialNode.add(r[i]);
+        	}
+        }
+        private boolean isSpecialNode(String s){
+        	return specialNode.contains(s);
+        }
+        
         final private void addTo(Set<Watcher> from, Set<Watcher> to) {
             if (from != null) {
                 to.addAll(from);
@@ -193,13 +206,13 @@ public class ZooKeeper {
             case NodeDataChanged:
             case NodeCreated:
                 synchronized (dataWatches) {
-                	if(clientPath.equals(HBpath))
+                	if(isSpecialNode(clientPath))
                 		addTo(dataWatches.get(clientPath), result);
                 	else
                 		addTo(dataWatches.remove(clientPath), result);
                 }
                 synchronized (existWatches) {
-                	if(clientPath.equals(HBpath))
+                	if(isSpecialNode(clientPath))
                 		addTo(existWatches.get(clientPath), result);
                 	else
                 		addTo(existWatches.remove(clientPath), result);
@@ -207,7 +220,7 @@ public class ZooKeeper {
                 break;
             case NodeChildrenChanged:
                 synchronized (childWatches) {
-                	if(clientPath.equals(HBpath))
+                	if(isSpecialNode(clientPath))
                 		addTo(childWatches.get(clientPath), result);
                 	else
                 		addTo(childWatches.remove(clientPath), result);

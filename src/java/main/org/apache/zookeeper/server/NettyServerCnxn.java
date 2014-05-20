@@ -849,4 +849,10 @@ public class NettyServerCnxn extends ServerCnxn {
         return zkServer.serverStats();
     }
 
+	@Override
+	public void sendSpecialNode(ReplyHeader h, Record r, String tag) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

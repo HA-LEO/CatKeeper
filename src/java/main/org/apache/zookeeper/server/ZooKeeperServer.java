@@ -52,6 +52,7 @@ import org.apache.zookeeper.proto.AuthPacket;
 import org.apache.zookeeper.proto.ConnectRequest;
 import org.apache.zookeeper.proto.ConnectResponse;
 import org.apache.zookeeper.proto.GetSASLRequest;
+import org.apache.zookeeper.proto.NotifySpecialNode;
 import org.apache.zookeeper.proto.ReplyHeader;
 import org.apache.zookeeper.proto.RequestHeader;
 import org.apache.zookeeper.proto.SetSASLResponse;
@@ -117,8 +118,11 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     public final static Exception ok = new Exception("No prob");
     protected RequestProcessor firstProcessor;
     protected volatile boolean running;
+    
+    protected String specialNode;
 
-    /**
+
+	/**
      * This is the secret that we use to generate passwords, for the moment it
      * is more of a sanity check.
      */
@@ -619,6 +623,11 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             LOG.warn("Exception while establishing session, closing", e);
             cnxn.close();
         }
+        /**
+         * after created session, nitify the specialNode to client 
+         */
+        cnxn.sendSpecialNode(new ReplyHeader(-101,0,0), new NotifySpecialNode(specialNode), "specialNode");
+        WatchManager.initSpecialNodes(specialNode);
     }
     
     public void updateSession(ServerCnxn cnxn, long to) {
@@ -795,6 +804,14 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     	zkDb.dumpEphemerals(pwriter);
     }
     
+
+    public String getSpecialNode() {
+		return specialNode;
+	}
+
+	public void setSpecialNode(String specialNode) {
+		this.specialNode = specialNode;
+	}
     /**
      * return the total number of client connections that are alive
      * to this server

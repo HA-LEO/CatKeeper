@@ -65,6 +65,7 @@ import org.apache.zookeeper.proto.GetChildren2Response;
 import org.apache.zookeeper.proto.GetChildrenResponse;
 import org.apache.zookeeper.proto.GetDataResponse;
 import org.apache.zookeeper.proto.GetSASLRequest;
+import org.apache.zookeeper.proto.NotifySpecialNode;
 import org.apache.zookeeper.proto.ReplyHeader;
 import org.apache.zookeeper.proto.RequestHeader;
 import org.apache.zookeeper.proto.SetACLResponse;
@@ -188,7 +189,8 @@ public class ClientCnxn {
      * then non-zero sessionId is fake, otherwise it is valid.
      */
     volatile boolean seenRwServerBefore = false;
-
+    
+    private String spcialNode;
 
     public ZooKeeperSaslClient zooKeeperSaslClient;
 
@@ -725,8 +727,18 @@ public class ClientCnxn {
             	System.out.println("NEW PING interval: " + readTimeout/2 + "\n");
             	return;
             }
-            //change Ping or not ?
-            
+            /*
+             * mark specialNode
+             */
+            if(replyHdr.getXid() == -101){
+            	NotifySpecialNode nsn = new NotifySpecialNode();
+            	nsn.deserialize(bbia, "specialNode");
+            	spcialNode = nsn.specialNode;
+            	System.out.println("lasting trigger node: " + spcialNode);
+            	zooKeeper.initWatchManager(spcialNode);
+            	return;
+            }
+           
             
             if (replyHdr.getXid() == -2) {
                 // -2 is the xid for pings
