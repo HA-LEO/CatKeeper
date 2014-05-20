@@ -104,6 +104,10 @@ public class ZooKeeper {
     public void initWatchManager(String s) {
 		watchManager.initSpecialNodes(s);
 	}
+    public List<String> getSpecialNodes(){
+    	return watchManager.specialNode;
+    }
+    
 	List<String> getDataWatches() {
         synchronized(watchManager.dataWatches) {
             List<String> rc = new ArrayList<String>(watchManager.dataWatches.keySet());
