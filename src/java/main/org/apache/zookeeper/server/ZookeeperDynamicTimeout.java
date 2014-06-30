@@ -14,6 +14,11 @@ import javax.sound.midi.SysexMessage;
 
 import org.apache.zookeeper.proto.ReplyHeader;
 import org.apache.zookeeper.proto.UpdateTimeout;
+/**
+ * 
+ * @author Deguo Li  (li.deguo2008@gmail.com)
+ *
+ */
 
 public class ZookeeperDynamicTimeout extends Thread{
 
@@ -115,7 +120,7 @@ public class ZookeeperDynamicTimeout extends Thread{
 		int newtimeout;
 		while(true){
 			try {
-				sleep(500000000);
+				sleep(300000);
 				if(nsc.sock == null && getInit == true)
 					break;
 				if(updateResult() == false)

@@ -139,6 +139,14 @@ public class QuorumPeerMain {
                       new File(config.getDataLogDir()),
                       new File(config.getDataDir())));
           quorumPeer.setQuorumPeers(config.getServers());
+          /*
+           * 用于选举的实现的参数，
+           * 0为以原始的基于UDP的方式协作，
+           * 1为不进行用户验证的基于UDP的快速选举，
+           * 2为进行用户验证的基于UDP的快速选举，
+           * 3为基于TCP的快速选举，
+           * 默认值为3
+           */
           quorumPeer.setElectionType(config.getElectionAlg());
           quorumPeer.setMyid(config.getServerId());
           quorumPeer.setTickTime(config.getTickTime());
@@ -149,8 +157,7 @@ public class QuorumPeerMain {
           quorumPeer.setQuorumVerifier(config.getQuorumVerifier());
           quorumPeer.setCnxnFactory(cnxnFactory);
           quorumPeer.setZKDatabase(new ZKDatabase(quorumPeer.getTxnFactory()));
-          quorumPeer.setLearnerType(config.getPeerType());
-  
+          quorumPeer.setLearnerType(config.getPeerType());//observer, participant
           quorumPeer.start();
           quorumPeer.join();
       } catch (InterruptedException e) {

@@ -462,6 +462,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
         responder.interrupt();
     }
     synchronized public void startLeaderElection() {
+    	LOG.info("startLeaderElection...");
     	try {
     		currentVote = new Vote(myid, getLastLoggedZxid(), getCurrentEpoch());
     	} catch(IOException e) {
@@ -487,7 +488,7 @@ public class QuorumPeer extends Thread implements QuorumStats.Provider {
                 throw new RuntimeException(e);
             }
         }
-        this.electionAlg = createElectionAlgorithm(electionType);
+        this.electionAlg = createElectionAlgorithm(electionType);//3, TCP
     }
     
     /**

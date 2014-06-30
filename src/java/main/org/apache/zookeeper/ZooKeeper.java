@@ -105,7 +105,7 @@ public class ZooKeeper {
 		watchManager.initSpecialNodes(s);
 	}
     public List<String> getSpecialNodes(){
-    	return watchManager.specialNode;
+    	return ZKWatchManager.specialNode;
     }
     
 	List<String> getDataWatches() {
