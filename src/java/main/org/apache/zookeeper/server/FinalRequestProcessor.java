@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import org.apache.jute.BinaryInputArchive;
 import org.apache.jute.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,7 @@ import org.apache.zookeeper.proto.SetDataResponse;
 import org.apache.zookeeper.proto.SetWatches;
 import org.apache.zookeeper.proto.SyncRequest;
 import org.apache.zookeeper.proto.SyncResponse;
+import org.apache.zookeeper.proto.UpdateTimeout;
 import org.apache.zookeeper.server.DataTree.ProcessTxnResult;
 import org.apache.zookeeper.server.ZooKeeperServer.ChangeRecord;
 import org.apache.zookeeper.txn.CreateSessionTxn;
@@ -176,6 +178,18 @@ public class FinalRequestProcessor implements RequestProcessor {
                 cnxn.sendResponse(new ReplyHeader(-2,
                         zks.getZKDatabase().getDataTreeLastProcessedZxid(), 0), null, "response");
                 return;
+            }
+            case OpCode.updateTimeout:{
+            	NIOServerCnxn nsc = (NIOServerCnxn) request.cnxn;
+            	ByteBufferInputStream bbis = new ByteBufferInputStream(request.request);
+                BinaryInputArchive bbia = BinaryInputArchive.getArchive(bbis);
+            	UpdateTimeout uto = new UpdateTimeout();
+            	uto.deserialize(bbia, "updateTimeout");
+
+            	nsc.getSessionTracker().UpdateSession(request.sessionId, uto.newTimeout);
+        		nsc.setSessionTimeout(uto.newTimeout);
+        		System.out.println("Session ID: " + request.sessionId + " NEW timeout: " + uto.newTimeout);
+            	return;
             }
             case OpCode.createSession: {
                 zks.serverStats().updateLatency(request.createTime);

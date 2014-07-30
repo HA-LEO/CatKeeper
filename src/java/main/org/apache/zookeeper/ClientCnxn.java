@@ -85,6 +85,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ClientCnxn {
+	private DynamicTimeout dt;
     private static final Logger LOG = LoggerFactory.getLogger(ClientCnxn.class);
 
     /** This controls whether automatic watch resetting is enabled.
@@ -138,7 +139,18 @@ public class ClientCnxn {
 
     private int readTimeout;
 
-    private final int sessionTimeout;
+    public void updateTimeout(int nt){
+        //notify Zookeeper Server
+        RequestHeader h = new RequestHeader(-102, OpCode.updateTimeout);
+        queuePacket(h, null, new UpdateTimeout(nt), null, null, null, null, null, null);
+        
+        //update local timeout
+    	negotiatedSessionTimeout = nt;
+    	readTimeout = negotiatedSessionTimeout * 2 / 3;
+        connectTimeout = negotiatedSessionTimeout / hostProvider.size();
+    }
+
+	private final int sessionTimeout;
 
     private final ZooKeeper zooKeeper;
 
@@ -702,7 +714,7 @@ public class ClientCnxn {
     class SendThread extends Thread {
         private long lastPingSentNs;
         private final ClientCnxnSocket clientCnxnSocket;
-        private Random r = new Random(System.nanoTime());        
+        private Random r = new Random(System.nanoTime());
         private boolean isFirstConnect = true;
         private boolean isFirstPing = false;
 
@@ -749,6 +761,7 @@ public class ClientCnxn {
                             + ((System.nanoTime() - lastPingSentNs) / 1000000)
                             + "ms");
                 }
+                dt.addTohistory((System.nanoTime() - lastPingSentNs) / 1000000);
                 return;
             }
             if (replyHdr.getXid() == -4) {
@@ -1262,6 +1275,7 @@ public class ClientCnxn {
             eventThread.queueEvent(new WatchedEvent(
                     Watcher.Event.EventType.None,
                     eventState, null));
+            initDynamicTimeout(negotiatedSessionTimeout);
         }
 
         void close() {
@@ -1423,5 +1437,9 @@ public class ClientCnxn {
 
     States getState() {
         return state;
+    }
+    
+    public void initDynamicTimeout(int t){
+    	dt = new DynamicTimeout(this,t);
     }
 }
