@@ -4,9 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-
-import org.apache.zookeeper.proto.ReplyHeader;
-import org.apache.zookeeper.proto.UpdateTimeout;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DynamicTimeout {
 	private int sessionTimeout = -1;
@@ -17,6 +16,8 @@ public class DynamicTimeout {
 
 	FileOutputStream out;
 	PrintStream p;
+	
+	public Set hb = new HashSet<Long>();
 	
 	public DynamicTimeout(ClientCnxn client, int timeout){
 		this.sessionTimeout = timeout;

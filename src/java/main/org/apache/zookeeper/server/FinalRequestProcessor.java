@@ -45,6 +45,7 @@ import org.apache.zookeeper.proto.GetChildrenRequest;
 import org.apache.zookeeper.proto.GetChildrenResponse;
 import org.apache.zookeeper.proto.GetDataRequest;
 import org.apache.zookeeper.proto.GetDataResponse;
+import org.apache.zookeeper.proto.HeartBeat;
 import org.apache.zookeeper.proto.ReplyHeader;
 import org.apache.zookeeper.proto.SetACLResponse;
 import org.apache.zookeeper.proto.SetDataResponse;
@@ -169,14 +170,27 @@ public class FinalRequestProcessor implements RequestProcessor {
                 cnxn.updateStatsForResponse(request.cxid, request.zxid, lastOp,
                         request.createTime, System.currentTimeMillis());
                 /**
-                 * record HeartBeat
+                 * record HeartBeat <method 1>
                  */
-//                NIOServerCnxn n = (NIOServerCnxn) request.cnxn;
-//                if(n != null){
-//                	n.zdt.addTohistory(System.nanoTime());
-//                }
+                /*
+                NIOServerCnxn n = (NIOServerCnxn) request.cnxn;
+                if(n != null){
+                	n.zdt.addTohistory(System.nanoTime());
+                }*/
+                
+                /**
+                 * send reply of ping <method 2>
+                 */
+                NIOServerCnxn nsc = (NIOServerCnxn) request.cnxn;
+            	ByteBufferInputStream bbis = new ByteBufferInputStream(request.request);
+                BinaryInputArchive bbia = BinaryInputArchive.getArchive(bbis);
+            	HeartBeat hb = new HeartBeat();
+            	hb.deserialize(bbia, "HeartHeat");
+            	
+                cnxn.sendResponse(new ReplyHeader(-2, hb.seq, 0), null, "response");
+                /*
                 cnxn.sendResponse(new ReplyHeader(-2,
-                        zks.getZKDatabase().getDataTreeLastProcessedZxid(), 0), null, "response");
+                        zks.getZKDatabase().getDataTreeLastProcessedZxid(), 0), null, "response");*/
                 return;
             }
             case OpCode.updateTimeout:{

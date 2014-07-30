@@ -65,6 +65,7 @@ import org.apache.zookeeper.proto.GetChildren2Response;
 import org.apache.zookeeper.proto.GetChildrenResponse;
 import org.apache.zookeeper.proto.GetDataResponse;
 import org.apache.zookeeper.proto.GetSASLRequest;
+import org.apache.zookeeper.proto.HeartBeat;
 import org.apache.zookeeper.proto.NotifySpecialNode;
 import org.apache.zookeeper.proto.ReplyHeader;
 import org.apache.zookeeper.proto.RequestHeader;
@@ -761,7 +762,9 @@ public class ClientCnxn {
                             + ((System.nanoTime() - lastPingSentNs) / 1000000)
                             + "ms");
                 }
-                dt.addTohistory((System.nanoTime() - lastPingSentNs) / 1000000);
+                Long zxid = replyHdr.getZxid();
+                dt.addTohistory((System.nanoTime() - zxid) / 1000000);
+                dt.hb.remove(zxid);
                 return;
             }
             if (replyHdr.getXid() == -4) {
@@ -955,8 +958,10 @@ public class ClientCnxn {
 
         private void sendPing() {
             lastPingSentNs = System.nanoTime();
+            dt.hb.add(lastPingSentNs);
             RequestHeader h = new RequestHeader(-2, OpCode.ping);
-            queuePacket(h, null, null, null, null, null, null, null, null);
+            HeartBeat hb = new HeartBeat(lastPingSentNs);
+            queuePacket(h, null, hb, null, null, null, null, null, null);
         }
 
         private InetSocketAddress rwServerAddress = null;
