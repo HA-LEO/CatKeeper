@@ -1,3 +1,7 @@
 *.class
-build/
+build/classes/
+build/contrib
+build/lib
+build/package
+build/test
 
