@@ -1,3 +1,9 @@
+
+My zookeeper optimization:
+
+<Li.deguo2008@gmail.com>
+
+//*********************************************************************************
 For the latest information about ZooKeeper, please visit our website at:
 
    http://zookeeper.apache.org/
