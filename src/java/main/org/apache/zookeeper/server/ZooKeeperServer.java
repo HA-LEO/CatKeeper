@@ -624,7 +624,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             cnxn.close();
         }
         /**
-         * after created session, nitify the specialNode to client
+         * after created session, notify the specialNode to client
          */
         cnxn.sendSpecialNode(new ReplyHeader(-101,0,0), new NotifySpecialNode(specialNode), "specialNode");
         WatchManager.initSpecialNodes(specialNode);

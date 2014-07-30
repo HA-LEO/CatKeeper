@@ -713,7 +713,7 @@ public class ClientCnxn {
             ReplyHeader replyHdr = new ReplyHeader();
 
             replyHdr.deserialize(bbia, "header");
-            /*
+            /**
              * update Timeout.
              */
             if(replyHdr.getXid() == -100){
@@ -727,7 +727,7 @@ public class ClientCnxn {
             	System.out.println("NEW PING interval: " + readTimeout/2 + "\n");
             	return;
             }
-            /*
+            /**
              * mark specialNode
              */
             if(replyHdr.getXid() == -101){

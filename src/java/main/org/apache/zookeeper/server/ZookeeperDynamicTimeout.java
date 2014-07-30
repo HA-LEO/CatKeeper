@@ -120,7 +120,7 @@ public class ZookeeperDynamicTimeout extends Thread{
 		int newtimeout;
 		while(true){
 			try {
-				sleep(300000);
+				sleep(3000);
 				if(nsc.sock == null && getInit == true)
 					break;
 				if(updateResult() == false)
