@@ -716,17 +716,17 @@ public class ClientCnxn {
             /**
              * update Timeout.
              */
-            if(replyHdr.getXid() == -100){
-            	UpdateTimeout uto = new UpdateTimeout();
-            	uto.deserialize(bbia, "updateTimeout");
-            	negotiatedSessionTimeout = uto.newTimeout;
-            	readTimeout = negotiatedSessionTimeout * 2 / 3;
-            	
-            	System.out.println("NEW Timeout: " + negotiatedSessionTimeout);
-            	System.out.println("NEW Client Timeout: " + readTimeout);
-            	System.out.println("NEW PING interval: " + readTimeout/2 + "\n");
-            	return;
-            }
+//            if(replyHdr.getXid() == -100){
+//            	UpdateTimeout uto = new UpdateTimeout();
+//            	uto.deserialize(bbia, "updateTimeout");
+//            	negotiatedSessionTimeout = uto.newTimeout;
+//            	readTimeout = negotiatedSessionTimeout * 2 / 3;
+//            	
+//            	System.out.println("NEW Timeout: " + negotiatedSessionTimeout);
+//            	System.out.println("NEW Client Timeout: " + readTimeout);
+//            	System.out.println("NEW PING interval: " + readTimeout/2 + "\n");
+//            	return;
+//            }
             /**
              * mark specialNode
              */
@@ -1077,8 +1077,8 @@ public class ClientCnxn {
 	                        if (timeToNextPing <= 0) {
 	                            sendPing();
 	                            clientCnxnSocket.updateLastSend();
-		                        isFirstPing = true;
-		                        clientCnxnSocket.updatelastSendPing();
+		                        //isFirstPing = true;
+		                        //clientCnxnSocket.updatelastSendPing();
 	                        } else {
 	                            if (timeToNextPing < to) {
 	                            	//to is Selector's timeout

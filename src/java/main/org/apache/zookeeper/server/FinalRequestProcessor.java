@@ -99,7 +99,7 @@ public class FinalRequestProcessor implements RequestProcessor {
         synchronized (zks.outstandingChanges) {
             while (!zks.outstandingChanges.isEmpty()
                     && zks.outstandingChanges.get(0).zxid <= request.zxid) {
-                ChangeRecord cr = zks.outstandingChanges.remove(0);
+                ChangeRecord cr = (ChangeRecord) zks.outstandingChanges.remove(0);
                 if (cr.zxid < request.zxid) {
                     LOG.warn("Zxid outstanding "
                             + cr.zxid
@@ -169,10 +169,10 @@ public class FinalRequestProcessor implements RequestProcessor {
                 /**
                  * record HeartBeat
                  */
-                NIOServerCnxn n = (NIOServerCnxn) request.cnxn;
-                if(n != null){
-                	n.zdt.addTohistory(System.nanoTime());
-                }
+//                NIOServerCnxn n = (NIOServerCnxn) request.cnxn;
+//                if(n != null){
+//                	n.zdt.addTohistory(System.nanoTime());
+//                }
                 cnxn.sendResponse(new ReplyHeader(-2,
                         zks.getZKDatabase().getDataTreeLastProcessedZxid(), 0), null, "response");
                 return;

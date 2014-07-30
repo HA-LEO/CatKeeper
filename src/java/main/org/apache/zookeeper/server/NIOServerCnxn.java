@@ -79,7 +79,7 @@ public class NIOServerCnxn extends ServerCnxn {
     int sessionTimeout = 0;
 
     private final ZooKeeperServer zkServer;
-    public ZookeeperDynamicTimeout zdt = new ZookeeperDynamicTimeout();
+    //public ZookeeperDynamicTimeout zdt = new ZookeeperDynamicTimeout();
     private boolean startedDynamicTimeout = false;
     
     /**
@@ -119,8 +119,7 @@ public class NIOServerCnxn extends ServerCnxn {
         /**
          * init DynamicTimeout
          */
-        zdt.setNIOServerCnxn(this);
-        //this.zkServer.zdt = this.zdt;
+        //zdt.setNIOServerCnxn(this);
     }
 
     /* Send close connection packet to the client, doIO will eventually
@@ -210,10 +209,10 @@ public class NIOServerCnxn extends ServerCnxn {
                 readConnectRequest();
             } else {
             	//System.out.println("readRequest");
-            	if(startedDynamicTimeout == false){
-            		this.zdt.start();
-            		startedDynamicTimeout = true;
-            	}
+//            	if(startedDynamicTimeout == false){
+//            		this.zdt.start();
+//            		startedDynamicTimeout = true;
+//            	}
                 readRequest();
             }
             lenBuffer.clear();
@@ -1189,7 +1188,7 @@ public class NIOServerCnxn extends ServerCnxn {
     @Override
     public void setSessionId(long sessionId) {
         this.sessionId = sessionId;
-        this.zdt.setSessionId(sessionId);
+        //this.zdt.setSessionId(sessionId);
     }
 
     @Override
