@@ -763,6 +763,7 @@ public class ClientCnxn {
                             + "ms");
                 }
                 Long zxid = replyHdr.getZxid();
+                //System.out.println("Zxid:" + zxid);
                 dt.addTohistory((System.nanoTime() - zxid) / 1000000);
                 dt.hb.remove(zxid);
                 return;
@@ -838,6 +839,9 @@ public class ClientCnxn {
              */
             try {
                 if (packet.requestHeader.getXid() != replyHdr.getXid()) {
+                	if(packet.replyHeader == null)
+                		return;
+                	/*
                     packet.replyHeader.setErr(
                             KeeperException.Code.CONNECTIONLOSS.intValue());
                     throw new IOException("Xid out of order. Got Xid "
@@ -847,6 +851,7 @@ public class ClientCnxn {
                             + packet.requestHeader.getXid()
                             + " for a packet with details: "
                             + packet );
+                            */
                 }
 
                 packet.replyHeader.setXid(replyHdr.getXid());
@@ -856,7 +861,11 @@ public class ClientCnxn {
                     lastZxid = replyHdr.getZxid();
                 }
                 if (packet.response != null && replyHdr.getErr() == 0) {
-                    packet.response.deserialize(bbia, "response");
+                    try{
+                    	packet.response.deserialize(bbia, "response");
+                    }catch (Exception e) {
+						// TODO: handle exception
+					}
                 }
 
                 if (LOG.isDebugEnabled()) {

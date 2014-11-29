@@ -40,15 +40,16 @@ public class DynamicTimeout {
 	 * @return new timeout value
 	 */
 	private int calcuateTimeout(){
+		System.out.println("Calcuating Timeout... ");
 		float new_avg_ping = 0, new_min_ping = 0, new_max_ping = 0;
 		float ping_interval = (float) (sessionTimeout/3.0);
 		new_avg_ping = avgOfResult();
 		new_min_ping = minOfResult();
 		new_max_ping = maxOfResult();
-		System.out.println("AVG " + new_avg_ping);
+		/*System.out.println("AVG " + new_avg_ping);
 		System.out.println("MIN " + new_min_ping);
 		System.out.println("MAX " + new_max_ping);
-		System.out.println("ping interval: " + ping_interval);
+		System.out.println("ping interval: " + ping_interval);*/
 		
 		if(Math.abs(new_avg_ping) > ping_interval*0.05 ||
 				Math.abs(new_min_ping) > ping_interval*0.1 ||
@@ -98,13 +99,15 @@ public class DynamicTimeout {
 			//trigger Dynamic timeout algorithm
 			int nt = 0;
 			if((nt = calcuateTimeout()) != 0){
-				System.out.println("updata timeout: " + nt);
+				System.out.println("update timeout: " + nt);
 				updateSessionTimeout(nt);
+			}else{
+				System.out.println("Don't need update timeout");
 			}
 		}
 		p1 = p1%length;
 		history[p1] = time;
-		System.out.println("delay: " + time + " ms");
+		//System.out.println("delay: " + time + " ms");
 		p1++;
 		return p1;
 	}
@@ -119,7 +122,12 @@ public class DynamicTimeout {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-
+		try{
+			System.out.println(123);
+			return;
+		}finally{
+			System.out.println(456);
+		}
 	}
 
 }
